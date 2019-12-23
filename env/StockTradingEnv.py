@@ -73,7 +73,7 @@ class StockTradingEnv(gym.Env):
             [self.balance / MAX_ACCOUNT_BALANCE],
             [self.max_net_worth / MAX_ACCOUNT_BALANCE],
             [self.shares_held / MAX_NUM_SHARES],
-            [self.cost_basis / MAX_SHARE_PRICE],
+            [self.average_price / MAX_SHARE_PRICE],
             [self.total_sales_value / (MAX_NUM_SHARES * MAX_SHARE_PRICE)],
         ], axis=1)
 
@@ -90,11 +90,11 @@ class StockTradingEnv(gym.Env):
             # Buy amount % of balance in shares
             total_possible = int(self.balance / current_price)
             shares_bought = int(total_possible * amount)
-            prev_cost = self.cost_basis * self.shares_held
+            prev_cost = self.average_price * self.shares_held
             additional_cost = shares_bought * current_price
 
             self.balance -= additional_cost
-            self.cost_basis = (
+            self.average_price = (
                 prev_cost + additional_cost) / (self.shares_held + shares_bought)
             self.shares_held += shares_bought
 
@@ -122,14 +122,14 @@ class StockTradingEnv(gym.Env):
             self.max_net_worth = self.net_worth
 
         if self.shares_held == 0:
-            self.cost_basis = 0
+            self.average_price = 0
 
     def step(self, action):
         # Execute one time step within the environment
         self._take_action(action)
 
         self.current_step += 1
-        reward=self.current_price*self.shares_held*0.998-self.cost_basis*self.shares_held
+        reward=self.current_price*self.shares_held*0.998-self.average_price*self.shares_held
         done=self.shares_held<=0 or self.current_step >= len(
             self.df.loc[:, 'Open'].values)
 
@@ -149,7 +149,7 @@ class StockTradingEnv(gym.Env):
         self.net_worth = INITIAL_ACCOUNT_BALANCE
         self.max_net_worth = INITIAL_ACCOUNT_BALANCE
         self.shares_held = 0
-        self.cost_basis = 0
+        self.average_price = 0
         self.total_shares_sold = 0
         self.total_sales_value = 0
         self.current_step = random.randint(0,len(self.df.loc[:, 'Open'].values))
@@ -167,7 +167,7 @@ class StockTradingEnv(gym.Env):
         file.write(
             f'Shares held: {self.shares_held} (Total sold: {self.total_shares_sold})\n')
         file.write(
-            f'Avg cost for held shares: {self.cost_basis} (Total sales value: {self.total_sales_value})\n')
+            f'Avg cost for held shares: {self.average_price} (Total sales value: {self.total_sales_value})\n')
         file.write(
             f'Net worth: {self.net_worth} (Max net worth: {self.max_net_worth})\n')
         file.write(f'Profit: {profit}\n\n')
