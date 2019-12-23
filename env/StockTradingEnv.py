@@ -152,7 +152,7 @@ class StockTradingEnv(gym.Env):
         self.cost_basis = 0
         self.total_shares_sold = 0
         self.total_sales_value = 0
-        self.current_step = 0
+        self.current_step = random.randint(0,len(self.df.loc[:, 'Open'].values))
         self.trades = []
 
         return self._next_observation()
