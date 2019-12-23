@@ -129,12 +129,15 @@ class StockTradingEnv(gym.Env):
         self._take_action(action)
 
         self.current_step += 1
-
-        delay_modifier = (self.current_step / MAX_STEPS)
-
-        reward = self.balance * delay_modifier + self.current_step
-        done = self.net_worth <= 0 or self.current_step >= len(
+        reward=self.current_price*self.shares_held*0.998-self.cost_basis*self.shares_held
+        done=self.shares_held<=0 or self.current_step >= len(
             self.df.loc[:, 'Open'].values)
+
+        #delay_modifier = (self.current_step / MAX_STEPS)
+
+        #reward = self.balance * delay_modifier + self.current_step
+        #done = self.net_worth <= 0 or self.current_step >= len(
+         #   self.df.loc[:, 'Open'].values)
 
         obs = self._next_observation()
 
