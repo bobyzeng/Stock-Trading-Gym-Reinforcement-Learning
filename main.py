@@ -21,7 +21,7 @@ env = DummyVecEnv([lambda: StockTradingEnv(df)])
 
 model = PPO2(MlpPolicy, env, verbose=1)
 model.learn(total_timesteps=20000)
-
+model.save('PPO2')
 obs = env.reset()
 for i in range(2000):
     action, _states = model.predict(obs)
